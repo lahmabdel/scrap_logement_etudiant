@@ -1,5 +1,5 @@
 import logging
-import schedule
+import os
 import utilities
 import scrappy_scrappa
 
@@ -8,8 +8,8 @@ import scrappy_scrappa
 logging.basicConfig(level=logging.INFO)
 
 # Your Telegram credentials (replace with real values)
-TOKEN = "7702053498:AAFk1PF5cUOTQtPLuRCBtyBvhAsGv2drbzY"
-TELEGRAM_CHAT_ID = "6944770884"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # File to store "seen" IDs (covers both Studélites and Arpej)
 SEEN_IDS_FILE = "seen_ids.json"
