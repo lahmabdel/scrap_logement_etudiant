@@ -2,29 +2,54 @@ name: "Scheduled Scraper"
 
 on:
   schedule:
-    - cron: '0 */2 * * *' 
+    - cron: '0 */2 * * *'  # Toutes les 2 heures
   workflow_dispatch:
 
 jobs:
   scrape:
+    # Permet à ce job de faire un commit/push
+    permissions:
+      contents: write
+
     runs-on: ubuntu-latest
 
     steps:
+      # 1) Récupère le code du dépôt
       - name: Check out repository code
         uses: actions/checkout@v2
 
+      # 2) Installe Python 3.9
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
 
+      # 3) Installe les dépendances
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # 4) Exécute le script de scrape
       - name: Run scraper
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python studarp.py
+          echo "Scraper terminé."
 
+      # 5) Commit les modifications (seen_ids.json, par ex.) si elles existent
+      - name: Commit changes
+        run: |
+          # Configure l'utilisateur Git (pour l'auteur du commit)
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          # Vérifie s'il y a des modifications
+          if git diff --quiet; then
+            echo "Aucune modification à commit."
+          else
+            git add seen_ids.json
+            git commit -m "Mise à jour automatique de seen_ids.json"
+            git push
+            echo "Modifications poussées vers le dépôt."
+          fi
